@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คำนวณอายุ</title>
+    <style>
+        body {
+            font-family: 'Kanit', Arial, sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .input-group input, .input-group select {
+            width: 30%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .instructions {
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+            text-align: center;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .popup button {
+            margin-top: 15px;
+        }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+        footer a {
+            color: #4CAF50;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        footer img {
+            width: 20px;
+            height: 20px;
+            margin-left: 5px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+    <h1>คำนวณอายุ</h1>
+    <div class="instructions">
+        <strong>วิธีการใช้งาน:</strong>
+        <ol>
+            <li>ป้อนวันที่เกิดในช่อง "วัน" (1-31)</li>
+            <li>เลือกเดือนเกิดจาก dropdown</li>
+            <li>ป้อนปีเกิดในช่อง "ปี พ.ศ." (เช่น 2508)</li>
+            <li>กดปุ่ม "คำนวณอายุ" เพื่อดูผลลัพธ์</li>
+        </ol>
+    </div>
+    <form id="ageForm">
+        <div class="input-group">
+            <input type="number" id="day" min="1" max="31" placeholder="วัน" required>
+            <select id="month" required>
+                <option value="1">มกราคม</option>
+                <option value="2">กุมภาพันธ์</option>
+                <option value="3">มีนาคม</option>
+                <option value="4">เมษายน</option>
+                <option value="5">พฤษภาคม</option>
+                <option value="6">มิถุนายน</option>
+                <option value="7">กรกฎาคม</option>
+                <option value="8">สิงหาคม</option>
+                <option value="9">กันยายน</option>
+                <option value="10">ตุลาคม</option>
+                <option value="11">พฤศจิกายน</option>
+                <option value="12">ธันวาคม</option>
+            </select>
+            <input type="number" id="year" min="2400" max="2566" placeholder="ปี พ.ศ." required>
+        </div>
+        <button type="button" onclick="calculateAge()">คำนวณอายุ</button>
+    </form>
+</div>
+
+<footer>
+    จัดทำโดย <a href="https://web.facebook.com/KrunidE23VKF" target="_blank">
+        ครูนิด ศิษย์หลวงพ่อเสือ
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook Icon">
+    </a>
+</footer>
+
+<div class="overlay" id="overlay"></div>
+<div class="popup" id="popup">
+    <p id="resultText"></p>
+    <button onclick="closePopup()">ปิด</button>
+</div>
+
+<script>
+    const monthNames = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+    ];
+    const dayNames = [
+        "วันอาทิตย์", "วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์"
+    ];
+
+    function calculateAge() {
+        const day = parseInt(document.getElementById('day').value);
+        const month = parseInt(document.getElementById('month').value);
+        const year = parseInt(document.getElementById('year').value);
+
+        const birthDate = new Date(year - 543, month - 1, day); // แปลง พ.ศ. เป็น ค.ศ.
+        const today = new Date();
+
+        // คำนวณอายุ
+        let ageYears = today.getFullYear() - birthDate.getFullYear();
+        let ageMonths = today.getMonth() - birthDate.getMonth();
+        let ageDays = today.getDate() - birthDate.getDate();
+
+        if (ageDays < 0) {
+            ageMonths--;
+            ageDays += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+        }
+        if (ageMonths < 0) {
+            ageYears--;
+            ageMonths += 12;
+        }
+
+        // หาชื่อวันและเดือน
+        const birthDayOfWeek = dayNames[birthDate.getDay()];
+        const birthMonthName = monthNames[birthDate.getMonth()];
+        const todayDayOfWeek = dayNames[today.getDay()];
+        const todayMonthName = monthNames[today.getMonth()];
+
+        // แสดงผล
+        const resultText = `
+            <strong>วันที่เกิด:</strong> ${birthDayOfWeek}ที่ ${day} เดือน ${birthMonthName} พ.ศ. ${year}<br>
+            <strong>วันปัจจุบัน:</strong> ${todayDayOfWeek}ที่ ${today.getDate()} เดือน ${todayMonthName} พ.ศ. ${today.getFullYear() + 543}<br>
+            <strong>คุณเกิดมาแล้ว:</strong> ${ageYears} ปี ${ageMonths} เดือน ${ageDays} วัน
+        `;
+        document.getElementById('resultText').innerHTML = resultText;
+
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('popup').style.display = 'block';
+    }
+
+    function closePopup() {
+        // ล้างข้อมูลในฟอร์ม
+        document.getElementById('day').value = '';
+        document.getElementById('month').value = '1';
+        document.getElementById('year').value = '';
+
+        // ปิด popup
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('popup').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
