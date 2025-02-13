@@ -4,49 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คำนวณอายุเข้าเรียน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Kanit', Arial, sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: 'Kanit', sans-serif;
+            background-color: #f5f5f5;
             margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
             flex-direction: column;
+            align-items: center;
         }
         .container {
-            background-color: #fff;
+            background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             max-width: 500px;
             width: 100%;
         }
         h1 {
             color: #4CAF50;
+            text-align: center;
             margin-bottom: 20px;
+        }
+        .instructions {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .instructions ol {
+            margin: 10px 0 0 20px;
+            padding: 0;
         }
         .input-group {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 10px;
             margin-bottom: 20px;
         }
-        .input-group input, .input-group select {
-            width: 30%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             font-size: 16px;
-            text-align: center;
-            transition: border-color 0.3s ease;
+            flex: 1;
         }
-        .input-group input:focus, .input-group select:focus {
-            border-color: #4CAF50;
+        input:focus, select:focus {
             outline: none;
+            border-color: #4CAF50;
         }
         .radio-group {
             display: flex;
@@ -54,37 +61,16 @@
             gap: 20px;
             margin-bottom: 20px;
         }
-        .radio-group label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .radio-group input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        .instructions {
-            text-align: left;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #555;
-        }
-        .instructions ol {
-            padding-left: 20px;
-        }
         button {
-            background-color: #4CAF50;
+            background: #4CAF50;
             color: white;
-            padding: 10px 20px;
             border: none;
+            padding: 10px 20px;
             border-radius: 5px;
+            width: 100%;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            opacity: 0.5;
+            opacity: 0.6;
             pointer-events: none;
         }
         button.active {
@@ -92,7 +78,17 @@
             pointer-events: auto;
         }
         button:hover {
-            background-color: #45a049;
+            background: #45a049;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
         }
         .popup {
             display: none;
@@ -100,83 +96,57 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
+            background: white;
             padding: 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            z-index: 1000;
-            text-align: center;
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-        .popup button {
-            margin-top: 15px;
+            z-index: 101;
+            max-width: 90%;
+            width: 400px;
         }
         .result {
-            font-size: 18px;
             line-height: 1.6;
-            color: #333;
         }
-        .result strong {
-            color: #4CAF50;
-        }
-        .error-popup {
-            background-color: #ffebee;
-            border-left: 5px solid #f44336;
-            padding: 15px;
-            border-radius: 5px;
+        .error {
             color: #f44336;
-            font-size: 16px;
+            margin-bottom: 10px;
         }
         footer {
             margin-top: 20px;
             text-align: center;
             font-size: 14px;
-            color: #555;
         }
         footer a {
             color: #4CAF50;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-        }
-        footer a:hover {
-            text-decoration: underline;
+            gap: 5px;
         }
         footer img {
             width: 20px;
             height: 20px;
-            margin-left: 5px;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="container">
+        <h1>คำนวณอายุเข้าเรียน</h1>
+        
+        <div class="instructions">
+            <strong>วิธีการใช้งาน:</strong>
+            <ol>
+                <li>ป้อนวันที่เกิดในช่อง "วัน" (1-31)</li>
+                <li>เลือกเดือนเกิดจาก dropdown</li>
+                <li>ป้อนปีเกิดในช่อง "ปี พ.ศ." (เช่น 2508)</li>
+                <li>เลือกว่าจะคำนวณอายุถึงวันที่ปัจจุบันหรือ 16 พฤษภาคม พ.ศ.ปัจจุบัน</li>
+                <li>กดปุ่ม "คำนวณอายุเข้าเรียน" เพื่อดูผลลัพธ์</li>
+            </ol>
+        </div>
 
-<div class="container">
-    <h1>คำนวณอายุเข้าเรียน</h1>
-    <div class="instructions">
-        <strong>วิธีการใช้งาน:</strong>
-        <ol>
-            <li>ป้อนวันที่เกิดในช่อง "วัน" (1-31)</li>
-            <li>เลือกเดือนเกิดจาก dropdown</li>
-            <li>ป้อนปีเกิดในช่อง "ปี พ.ศ." (เช่น 2508)</li>
-            <li>เลือกว่าจะคำนวณอายุถึงวันที่ปัจจุบันหรือ 16 พฤษภาคม พ.ศ.ปัจจุบัน</li>
-            <li>กดปุ่ม "คำนวณอายุเข้าเรียน" เพื่อดูผลลัพธ์</li>
-        </ol>
-    </div>
-    <form id="ageForm">
         <div class="input-group">
-            <input type="number" id="day" min="1" max="31" placeholder="วัน" required>
-            <select id="month" required>
+            <input type="number" id="day" placeholder="วัน" min="1" max="31">
+            <select id="month">
+                <option value="">เดือน</option>
                 <option value="1">มกราคม</option>
                 <option value="2">กุมภาพันธ์</option>
                 <option value="3">มีนาคม</option>
@@ -190,153 +160,159 @@
                 <option value="11">พฤศจิกายน</option>
                 <option value="12">ธันวาคม</option>
             </select>
-            <input type="number" id="year" min="2400" max="2580" placeholder="ปี พ.ศ." required>
+            <input type="number" id="year" placeholder="ปี พ.ศ." min="2400" max="2580">
         </div>
+
         <div class="radio-group">
             <label>
-                <input type="radio" name="calculateUntil" value="today" checked> วันที่ปัจจุบัน
+                <input type="radio" name="dateType" value="today" checked>
+                วันที่ปัจจุบัน
             </label>
             <label>
-                <input type="radio" name="calculateUntil" value="may16"> 16 พฤษภาคม พ.ศ.ปัจจุบัน
+                <input type="radio" name="dateType" value="may16">
+                16 พฤษภาคม พ.ศ.ปัจจุบัน
             </label>
         </div>
-        <button type="button" id="calculateButton" onclick="calculateAge()">คำนวณอายุเข้าเรียน</button>
-    </form>
-</div>
 
-<footer>
-    จัดทำโดย <a href="https://web.facebook.com/KrunidE23VKF" target="_blank">
-        ครูนิด ศิษย์หลวงพ่อเสือ
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook Icon">
-    </a>
-    <br>Code Form <a href="https://www.deepseek.com/" target="_blank"> deepseek AI 
-    <img src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png" alt="Deepseek Icon">
-    </a>
-</footer>
+        <button id="calculateBtn" onclick="calculate()">คำนวณอายุเข้าเรียน</button>
+    </div>
 
-<!-- Popup สำหรับแสดงผลลัพธ์ -->
-<div class="overlay" id="overlay"></div>
-<div class="popup" id="popup">
-    <div class="result" id="resultText"></div>
-    <button onclick="closePopup()">ปิด</button>
-</div>
+    <div class="overlay" id="overlay" onclick="closePopup()"></div>
+    <div class="popup" id="popup">
+        <h1>ผลการคำนวณอายุเข้าเรียน</h1>
+        <div class="result" id="result"></div>
+        <button onclick="closePopup()" style="margin-top: 15px; opacity: 1; pointer-events: auto;">ปิด</button>
+    </div>
 
-<!-- Popup สำหรับแสดงข้อผิดพลาด -->
-<div class="overlay" id="errorOverlay"></div>
-<div class="popup" id="errorPopup">
-    <div class="error-popup" id="errorText"></div>
-    <button onclick="closeErrorPopup()">ปิด</button>
-</div>
+    <footer>
+        จัดทำโดย <a href="https://web.facebook.com/KrunidE23VKF" target="_blank">
+            ครูนิด ศิษย์หลวงพ่อเสือ
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook">
+        </a>
+        <br>
+        Code Form <a href="https://www.deepseek.com/" target="_blank">
+            deepseek AI
+            <img src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/deepseek-color.png" alt="Deepseek">
+        </a>
+    </footer>
 
-<script>
-    const monthNames = [
-        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-    ];
-    const dayNames = [
-        "วันอาทิตย์", "วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์"
-    ];
+    <script>
+        const dayInput = document.getElementById('day');
+        const monthInput = document.getElementById('month');
+        const yearInput = document.getElementById('year');
+        const calculateBtn = document.getElementById('calculateBtn');
+        
+        const monthNames = [
+            'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+            'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+        ];
+        
+        const dayNames = [
+            'อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'
+        ];
 
-    const dayInput = document.getElementById('day');
-    const monthInput = document.getElementById('month');
-    const yearInput = document.getElementById('year');
-    const calculateButton = document.getElementById('calculateButton');
-
-    // ตรวจสอบการกรอกข้อมูล
-    function checkInputs() {
-        const day = dayInput.value;
-        const month = monthInput.value;
-        const year = yearInput.value;
-
-        if (day && month && year) {
-            calculateButton.classList.add('active');
-        } else {
-            calculateButton.classList.remove('active');
-        }
-    }
-
-    // ตรวจสอบเมื่อมีการกรอกข้อมูล
-    dayInput.addEventListener('input', checkInputs);
-    monthInput.addEventListener('change', checkInputs);
-    yearInput.addEventListener('input', checkInputs);
-
-    function showError(message) {
-        document.getElementById('errorText').innerHTML = message;
-        document.getElementById('errorOverlay').style.display = 'block';
-        document.getElementById('errorPopup').style.display = 'block';
-    }
-
-    function closeErrorPopup() {
-        document.getElementById('errorOverlay').style.display = 'none';
-        document.getElementById('errorPopup').style.display = 'none';
-    }
-
-    function calculateAge() {
-        const day = parseInt(dayInput.value);
-        const month = parseInt(monthInput.value);
-        const year = parseInt(yearInput.value);
-        const calculateUntil = document.querySelector('input[name="calculateUntil"]:checked').value;
-
-        // ตรวจสอบข้อมูล
-        if (day < 1 || day > 31 || year < 2400 || year > 2580) {
-            showError("กรุณากรอกข้อมูลให้ถูกต้อง<br>- วัน: 1 ถึง 31<br>- ปี พ.ศ.: 2400 ถึง 2580");
-            return;
+        // ตรวจสอบการกรอกข้อมูล
+        function checkInputs() {
+            const day = dayInput.value.trim();
+            const month = monthInput.value.trim();
+            const year = yearInput.value.trim();
+            
+            if (day && month && year) {
+                calculateBtn.classList.add('active');
+            } else {
+                calculateBtn.classList.remove('active');
+            }
         }
 
-        const birthDate = new Date(year - 543, month - 1, day); // แปลง พ.ศ. เป็น ค.ศ.
-        let targetDate;
+        // เพิ่ม event listeners
+        dayInput.addEventListener('input', checkInputs);
+        monthInput.addEventListener('change', checkInputs);
+        yearInput.addEventListener('input', checkInputs);
 
-        if (calculateUntil === "may16") {
-            const currentYear = new Date().getFullYear();
-            targetDate = new Date(currentYear, 4, 16); // 16 พฤษภาคม พ.ศ.ปัจจุบัน
-        } else {
-            targetDate = new Date(); // วันที่ปัจจุบัน
+        function isLeapYear(year) {
+            const gregorianYear = year - 543;
+            return (gregorianYear % 4 === 0 && gregorianYear % 100 !== 0) || (gregorianYear % 400 === 0);
         }
 
-        // คำนวณอายุ
-        let ageYears = targetDate.getFullYear() - birthDate.getFullYear();
-        let ageMonths = targetDate.getMonth() - birthDate.getMonth();
-        let ageDays = targetDate.getDate() - birthDate.getDate();
-
-        if (ageDays < 0) {
-            ageMonths--;
-            ageDays += new Date(targetDate.getFullYear(), targetDate.getMonth(), 0).getDate();
-        }
-        if (ageMonths < 0) {
-            ageYears--;
-            ageMonths += 12;
+        function getDaysInMonth(month, year) {
+            const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            if (month === 2 && isLeapYear(year)) {
+                return 29;
+            }
+            return daysInMonth[month - 1];
         }
 
-        // หาชื่อวันและเดือน
-        const birthDayOfWeek = dayNames[birthDate.getDay()];
-        const birthMonthName = monthNames[birthDate.getMonth()];
-        const targetDayOfWeek = dayNames[targetDate.getDay()];
-        const targetMonthName = monthNames[targetDate.getMonth()];
+        function calculate() {
+            const day = parseInt(dayInput.value);
+            const month = parseInt(monthInput.value);
+            const year = parseInt(yearInput.value);
+            
+            // ตรวจสอบความถูกต้องของวันที่
+            const daysInMonth = getDaysInMonth(month, year);
+            if (day < 1 || day > daysInMonth) {
+                alert(`กรุณาใส่วันที่ให้ถูกต้อง (1-${daysInMonth})`);
+                return;
+            }
 
-        // แสดงผล
-        const resultText = `
-            <p><strong>วันที่เกิด:</strong> ${birthDayOfWeek}ที่ ${day} เดือน ${birthMonthName} พ.ศ. ${year}</p>
-            <p><strong>คำนวณอายุถึง:</strong> ${targetDayOfWeek}ที่ ${targetDate.getDate()} เดือน ${targetMonthName} พ.ศ. ${targetDate.getFullYear() + 543}</p>
-            <p><strong>คุณเกิดมาแล้ว:</strong> ${ageYears} ปี ${ageMonths} เดือน ${ageDays} วัน</p>
-        `;
-        document.getElementById('resultText').innerHTML = resultText;
+            // สร้างวันที่เกิด
+            const birthDate = new Date(year - 543, month - 1, day);
+            
+            // กำหนดวันที่จะคำนวณถึง
+            let targetDate;
+            const dateType = document.querySelector('input[name="dateType"]:checked').value;
+            
+            if (dateType === 'may16') {
+                const currentYear = new Date().getFullYear();
+                targetDate = new Date(currentYear, 4, 16); // 16 พฤษภาคม
+            } else {
+                targetDate = new Date(); // วันที่ปัจจุบัน
+            }
 
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('popup').style.display = 'block';
-    }
+            // คำนวณอายุ
+            let years = targetDate.getFullYear() - birthDate.getFullYear();
+            let months = targetDate.getMonth() - birthDate.getMonth();
+            let days = targetDate.getDate() - birthDate.getDate();
 
-    function closePopup() {
-        // ล้างข้อมูลในฟอร์ม
-        dayInput.value = '';
-        monthInput.value = '1';
-        yearInput.value = '';
-        calculateButton.classList.remove('active');
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
 
-        // ปิด popup
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('popup').style.display = 'none';
-    }
-</script>
+            // สร้างข้อความผลลัพธ์
+            const birthDayName = dayNames[birthDate.getDay()];
+            const targetDayName = dayNames[targetDate.getDay()];
+            
+            const result = `
+                <p><strong>วันเกิด:</strong> วัน${birthDayName}ที่ ${day} ${monthNames[month-1]} พ.ศ. ${year}</p>
+                <p><strong>คำนวณถึง:</strong> วัน${targetDayName}ที่ ${targetDate.getDate()} ${monthNames[targetDate.getMonth()]} พ.ศ. ${targetDate.getFullYear() + 543}</p>
+                <p><strong>อายุ:</strong> ${years} ปี ${months} เดือน ${days} วัน</p>
+            `;
 
+            // แสดงผลลัพธ์
+            document.getElementById('result').innerHTML = result;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function closePopup() {
+            // ซ่อน overlay และ popup
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popup').style.display = 'none';
+            
+            // เคลียร์ค่าในฟอร์ม
+            dayInput.value = '';
+            monthInput.value = '';
+            yearInput.value = '';
+            calculateBtn.classList.remove('active');
+            
+            // ให้โฟกัสที่ช่องวัน
+            dayInput.focus();
+        }
+    </script>
 </body>
 </html>
