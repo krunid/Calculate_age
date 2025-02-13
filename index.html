@@ -42,6 +42,11 @@
             border-radius: 5px;
             font-size: 16px;
             text-align: center;
+            transition: border-color 0.3s ease;
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: #4CAF50;
+            outline: none;
         }
         .instructions {
             text-align: left;
@@ -90,6 +95,22 @@
         }
         .popup button {
             margin-top: 15px;
+        }
+        .result {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .result strong {
+            color: #4CAF50;
+        }
+        .error-popup {
+            background-color: #ffebee;
+            border-left: 5px solid #f44336;
+            padding: 15px;
+            border-radius: 5px;
+            color: #f44336;
+            font-size: 16px;
         }
         footer {
             margin-top: 20px;
@@ -165,10 +186,18 @@
     </a>
 </footer>
 
+<!-- Popup สำหรับแสดงผลลัพธ์ -->
 <div class="overlay" id="overlay"></div>
 <div class="popup" id="popup">
-    <p id="resultText"></p>
+    <div class="result" id="resultText"></div>
     <button onclick="closePopup()">ปิด</button>
+</div>
+
+<!-- Popup สำหรับแสดงข้อผิดพลาด -->
+<div class="overlay" id="errorOverlay"></div>
+<div class="popup" id="errorPopup">
+    <div class="error-popup" id="errorText"></div>
+    <button onclick="closeErrorPopup()">ปิด</button>
 </div>
 
 <script>
@@ -180,11 +209,28 @@
         "วันอาทิตย์", "วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์"
     ];
 
+    function showError(message) {
+        document.getElementById('errorText').innerHTML = message;
+        document.getElementById('errorOverlay').style.display = 'block';
+        document.getElementById('errorPopup').style.display = 'block';
+    }
+
+    function closeErrorPopup() {
+        document.getElementById('errorOverlay').style.display = 'none';
+        document.getElementById('errorPopup').style.display = 'none';
+    }
+
     function calculateAge() {
         const day = parseInt(document.getElementById('day').value);
         const month = parseInt(document.getElementById('month').value);
         const year = parseInt(document.getElementById('year').value);
         const calculateUntil = document.getElementById('calculateUntil').value;
+
+        // ตรวจสอบข้อมูล
+        if (day < 1 || day > 31 || year < 2400 || year > 2566) {
+            showError("กรุณากรอกข้อมูลให้ถูกต้อง<br>- วัน: 1 ถึง 31<br>- ปี พ.ศ.: 2400 ถึง 2566");
+            return;
+        }
 
         const birthDate = new Date(year - 543, month - 1, day); // แปลง พ.ศ. เป็น ค.ศ.
         let targetDate;
@@ -218,9 +264,9 @@
 
         // แสดงผล
         const resultText = `
-            <strong>วันที่เกิด:</strong> ${birthDayOfWeek}ที่ ${day} เดือน ${birthMonthName} พ.ศ. ${year}<br>
-            <strong>คำนวณอายุถึง:</strong> ${targetDayOfWeek}ที่ ${targetDate.getDate()} เดือน ${targetMonthName} พ.ศ. ${targetDate.getFullYear() + 543}<br>
-            <strong>คุณเกิดมาแล้ว:</strong> ${ageYears} ปี ${ageMonths} เดือน ${ageDays} วัน
+            <p><strong>วันที่เกิด:</strong> ${birthDayOfWeek}ที่ ${day} เดือน ${birthMonthName} พ.ศ. ${year}</p>
+            <p><strong>คำนวณอายุถึง:</strong> ${targetDayOfWeek}ที่ ${targetDate.getDate()} เดือน ${targetMonthName} พ.ศ. ${targetDate.getFullYear() + 543}</p>
+            <p><strong>คุณเกิดมาแล้ว:</strong> ${ageYears} ปี ${ageMonths} เดือน ${ageDays} วัน</p>
         `;
         document.getElementById('resultText').innerHTML = resultText;
 
