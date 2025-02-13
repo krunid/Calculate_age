@@ -124,6 +124,7 @@
             <li>ป้อนวันที่เกิดในช่อง "วัน" (1-31)</li>
             <li>เลือกเดือนเกิดจาก dropdown</li>
             <li>ป้อนปีเกิดในช่อง "ปี พ.ศ." (เช่น 2508)</li>
+            <li>เลือกว่าจะคำนวณอายุถึงวันที่ปัจจุบันหรือ 16 พฤษภาคม พ.ศ.ปัจจุบัน</li>
             <li>กดปุ่ม "คำนวณอายุ" เพื่อดูผลลัพธ์</li>
         </ol>
     </div>
@@ -145,6 +146,13 @@
                 <option value="12">ธันวาคม</option>
             </select>
             <input type="number" id="year" min="2400" max="2566" placeholder="ปี พ.ศ." required>
+        </div>
+        <div class="input-group">
+            <label for="calculateUntil">คำนวณอายุถึง:</label>
+            <select id="calculateUntil" required>
+                <option value="today">วันที่ปัจจุบัน</option>
+                <option value="may16">16 พฤษภาคม พ.ศ.ปัจจุบัน</option>
+            </select>
         </div>
         <button type="button" onclick="calculateAge()">คำนวณอายุ</button>
     </form>
@@ -176,18 +184,26 @@
         const day = parseInt(document.getElementById('day').value);
         const month = parseInt(document.getElementById('month').value);
         const year = parseInt(document.getElementById('year').value);
+        const calculateUntil = document.getElementById('calculateUntil').value;
 
         const birthDate = new Date(year - 543, month - 1, day); // แปลง พ.ศ. เป็น ค.ศ.
-        const today = new Date();
+        let targetDate;
+
+        if (calculateUntil === "may16") {
+            const currentYear = new Date().getFullYear();
+            targetDate = new Date(currentYear, 4, 16); // 16 พฤษภาคม พ.ศ.ปัจจุบัน
+        } else {
+            targetDate = new Date(); // วันที่ปัจจุบัน
+        }
 
         // คำนวณอายุ
-        let ageYears = today.getFullYear() - birthDate.getFullYear();
-        let ageMonths = today.getMonth() - birthDate.getMonth();
-        let ageDays = today.getDate() - birthDate.getDate();
+        let ageYears = targetDate.getFullYear() - birthDate.getFullYear();
+        let ageMonths = targetDate.getMonth() - birthDate.getMonth();
+        let ageDays = targetDate.getDate() - birthDate.getDate();
 
         if (ageDays < 0) {
             ageMonths--;
-            ageDays += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+            ageDays += new Date(targetDate.getFullYear(), targetDate.getMonth(), 0).getDate();
         }
         if (ageMonths < 0) {
             ageYears--;
@@ -197,13 +213,13 @@
         // หาชื่อวันและเดือน
         const birthDayOfWeek = dayNames[birthDate.getDay()];
         const birthMonthName = monthNames[birthDate.getMonth()];
-        const todayDayOfWeek = dayNames[today.getDay()];
-        const todayMonthName = monthNames[today.getMonth()];
+        const targetDayOfWeek = dayNames[targetDate.getDay()];
+        const targetMonthName = monthNames[targetDate.getMonth()];
 
         // แสดงผล
         const resultText = `
             <strong>วันที่เกิด:</strong> ${birthDayOfWeek}ที่ ${day} เดือน ${birthMonthName} พ.ศ. ${year}<br>
-            <strong>วันปัจจุบัน:</strong> ${todayDayOfWeek}ที่ ${today.getDate()} เดือน ${todayMonthName} พ.ศ. ${today.getFullYear() + 543}<br>
+            <strong>คำนวณอายุถึง:</strong> ${targetDayOfWeek}ที่ ${targetDate.getDate()} เดือน ${targetMonthName} พ.ศ. ${targetDate.getFullYear() + 543}<br>
             <strong>คุณเกิดมาแล้ว:</strong> ${ageYears} ปี ${ageMonths} เดือน ${ageDays} วัน
         `;
         document.getElementById('resultText').innerHTML = resultText;
